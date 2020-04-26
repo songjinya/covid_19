@@ -14,24 +14,31 @@ def down_csv(api,local_name,url_csv,filename):
     github_time = time.strptime(cur_update,'%Y-%m-%dT%H:%M:%SZ')
     github_time=time.mktime(github_time)
     print(github_time)#github项目的更新时间戳
-
-    filemt = os.stat(local_name).st_mtime
-    print(filemt)#本地文件的时间戳
-
+    if local_name:
+        filemt = os.stat(local_name).st_mtime
+        print(filemt)#本地文件的时间戳
+    else:
+        filemt=0
     if github_time!=filemt:#假如文件有更新，就下载新的文件
-        print("1")
-        r = requests.get(url_csv, stream=True)  
-        print("2")
-        with open(filename, 'wb') as f:
+        fail_suc=0
+        while fail_suc==0:
+            print("1")
             try:
-                for chunk in r.iter_content(chunk_size=1024 * 1024):
-                    if chunk:
-                        f.write(chunk)
-                print("down success!")
-                return 1
+                r = requests.get(url_csv, stream=True)
+                print("2")
+                with open(filename, 'wb') as f:
+                    try:
+                        for chunk in r.iter_content(chunk_size=1024 * 1024):
+                            if chunk:
+                                f.write(chunk)
+                        print("down success!")
+                        fail_suc=1
+                    except:
+                        print("down fail")
+                        fail_suc=0
             except:
-                print("down fail")
-                return 0
+                print("request fail")
+                fail_suc=0
     else:
         print("no update")
         return 1
@@ -323,25 +330,25 @@ def grow_hubei(file):
       
 def grow_file():
     
-    # s_day_data=day_file("./csv/new_DXYArea.csv")    
-    # s_day_data.to_csv('./csv/s_day_data.csv',index=False,encoding="utf_8_sig")#导出文件
-    # print('s_day_data.csv success !!!')
+    s_day_data=day_file("./csv/new_DXYArea.csv")    
+    s_day_data.to_csv('./csv/s_day_data.csv',index=False,encoding="utf_8_sig")#导出文件
+    print('s_day_data.csv success !!!')
     
-    # s_outland=out_land('./csv/s_day_data.csv')    
-    # s_outland.to_csv('./csv/s_in_outland.csv',index=False,encoding="utf_8_sig")#导出文件
-    # print('s_in_outland.csv success !!!')   
+    s_outland=out_land('./csv/s_day_data.csv')    
+    s_outland.to_csv('./csv/s_in_outland.csv',index=False,encoding="utf_8_sig")#导出文件
+    print('s_in_outland.csv success !!!')   
         
-    # s_china_province=china_province('./csv/s_day_data.csv')    
-    # s_china_province.to_csv('./csv/s_in_china_province.csv',index=False,encoding="utf_8_sig")#导出文件
-    # print('s_in_china_province.csv success !!!') 
+    s_china_province=china_province('./csv/s_day_data.csv')    
+    s_china_province.to_csv('./csv/s_in_china_province.csv',index=False,encoding="utf_8_sig")#导出文件
+    print('s_in_china_province.csv success !!!') 
 
-    # s_world_data=world_data('./csv/s_in_china_province.csv','./csv/s_day_data.csv')
-    # s_world_data.to_csv('./csv/s_world_data.csv',index=False,encoding="utf_8_sig")#导出文件
-    # print('s_world_data.csv success !!!')
+    s_world_data=world_data('./csv/s_in_china_province.csv','./csv/s_day_data.csv')
+    s_world_data.to_csv('./csv/s_world_data.csv',index=False,encoding="utf_8_sig")#导出文件
+    print('s_world_data.csv success !!!')
     
-    # s_world_country=clean_world_data('./csv/s_world_data.csv')
-    # s_world_country.to_csv('./csv/s_in_world_country.csv',index=False,encoding="utf_8_sig")#导出文件
-    # print('s_in_world_country.csv success !!!')
+    s_world_country=clean_world_data('./csv/s_world_data.csv')
+    s_world_country.to_csv('./csv/s_in_world_country.csv',index=False,encoding="utf_8_sig")#导出文件
+    print('s_in_world_country.csv success !!!')
     
     hubei=grow_hubei('./csv/s_day_data.csv')
     hubei.to_csv('./csv/s_in_hubei.csv',index=False,encoding="utf_8_sig")#导出文件
@@ -350,15 +357,15 @@ def grow_file():
 
 #参数区  
 api = 'https://api.github.com/repos/BlankerL/DXY-COVID-19-Data'# Github项目及API接口数据
-local_name = 'new_DXYArea.csv'  # 下载到本地的路径
+local_name = './csv/new_DXYArea.csv'  # 下载到本地的路径
 url_csv="https://raw.githubusercontent.com/BlankerL/DXY-COVID-19-Data/master/csv/DXYArea.csv"#项目的下载路径
-filename = r"new_DXYArea.csv"
+filename = r"./csv/new_DXYArea.csv"
 
 file="new_DXYArea.csv"#要整理的文件名称
 
 #执行区
 if __name__ == "__main__":
-    # down_csv(api,local_name,url_csv,filename)    
+    down_csv(api,local_name,url_csv,filename)    
     grow_file()   
         
         
